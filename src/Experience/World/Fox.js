@@ -1,3 +1,4 @@
+/*
 import * as THREE from 'three'
 import Experience from '../Experience.js'
 
@@ -88,3 +89,4 @@ export default class Fox
         this.animation.mixer.update(this.time.delta * 0.001)
     }
 }
+    */

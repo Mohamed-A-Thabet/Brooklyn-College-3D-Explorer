@@ -25,7 +25,7 @@ export default [
     {
         name: 'sidewalkModel',
         type: 'gltfModel',
-        path: 'models/Fox/oneTest.glb'
+        path: 'models/oneTest.glb'
     },
     {
         name: 'sidewalkTexture',

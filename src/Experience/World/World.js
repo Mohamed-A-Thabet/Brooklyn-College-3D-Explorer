@@ -1,7 +1,7 @@
 import Experience from '../Experience.js'
 import Environment from './Environment.js'
 import Floor from './Floor.js'
-import Fox from './Fox.js'
+//import Fox from './Fox.js'
 import Sidewalk from './Sidewalk.js'
 
 export default class World

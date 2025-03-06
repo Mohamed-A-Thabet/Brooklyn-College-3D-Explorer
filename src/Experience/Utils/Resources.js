@@ -33,13 +33,16 @@ export default class Resources extends EventEmitter
         {
             if(source.type === 'gltfModel')
             {
+                console.log('source: ', source)
                 this.loaders.gltfLoader.load(
                     source.path,
                     (file) =>
                     {
+                        console.log('file: ', file)
                         this.sourceLoaded(source, file)
                     }
                 )
+                console.log('source2: ', source)
             }
             else if(source.type === 'texture')
             {

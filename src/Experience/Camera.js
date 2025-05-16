@@ -45,7 +45,6 @@ export default class Camera {
 
     setupEventListeners() {
         document.addEventListener("keydown", (event) => {
-            console.log(event.code);
             switch (event.code) {
                 case "ShiftLeft":
                 case "ShiftRight":

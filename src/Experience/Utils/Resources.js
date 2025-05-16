@@ -34,13 +34,10 @@ export default class Resources extends EventEmitter
         {
             if(source.type === 'gltfModel')
             {
-                const startTime = performance.now();
                 this.loaders.gltfLoader.load(
                     source.path,
                     (file) =>
                     {
-                        const endTime = performance.now();
-                        console.log(source.name, endTime - startTime)
                         this.sourceLoaded(source, file)
                     }
                 )

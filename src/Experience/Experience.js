@@ -34,12 +34,11 @@ export default class Experience
         this.debug = new Debug()
         this.sizes = new Sizes()
         this.time = new Time()
-        this.stats = new StatsWrapper()
+        //this.stats = new StatsWrapper()
         this.scene = new THREE.Scene()
         this.resources = new Resources(sources)
         this.camera = new Camera()
         this.renderer = new Renderer()
-        console.log(this.renderer.instance.info)
         this.world = new World()
 
         // Resize event
@@ -63,13 +62,13 @@ export default class Experience
 
     update()
     {
-        this.stats.begin()
+        //this.stats.begin()
 
         this.camera.update()
         this.world.update()
         this.renderer.update()
 
-        this.stats.end()
+        //this.stats.end()
     }
 
     destroy()

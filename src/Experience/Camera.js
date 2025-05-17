@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import Experience from "./Experience.js";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 export default class Camera {
     constructor() {
@@ -17,9 +18,17 @@ export default class Camera {
         this.direction = new THREE.Vector3();
         this.speed = 15.0;
 
+        this.controlMode = "walk";
+
+        this.walkPosition = new THREE.Vector3(0, 3, -15);
+        this.orbitPosition = new THREE.Vector3(0, 20, 10);
+
+        this.defaultLookAt = new THREE.Vector3(0, 3, 100);
+
         this.setInstance();
         this.setControls();
         this.setupEventListeners();
+        this.createModeToggle();
     }
 
     setInstance() {
@@ -29,23 +38,88 @@ export default class Camera {
             0.1,
             1500,
         );
-        this.instance.position.set(0, 3, -10);
-        this.instance.lookAt(new THREE.Vector3(0, 3, 0));
+
+        this.instance.position.copy(this.walkPosition);
+        this.instance.lookAt(this.defaultLookAt);
         this.scene.add(this.instance);
     }
 
     setControls() {
-        this.controls = new PointerLockControls(this.instance, this.canvas);
-        this.scene.add(this.controls.getObject());
+        this.pointerControls = new PointerLockControls(this.instance, this.canvas);
+        this.scene.add(this.pointerControls.getObject());
 
-        this.canvas.addEventListener("click", () => {
-            this.controls.lock();
-        });
+        this.orbitControls = new OrbitControls(this.instance, this.canvas);
+        this.orbitControls.enableDamping = true;
+        this.orbitControls.dampingFactor = 0.05;
+        this.orbitControls.screenSpacePanning = false;
+        this.orbitControls.maxPolarAngle = Math.PI / 2;
+        this.orbitControls.minDistance = 1;
+        this.orbitControls.maxDistance = 500;
+        this.orbitControls.target.copy(this.defaultLookAt);
+
+        this.setControlMode(this.controlMode);
+    }
+
+    setControlMode(mode) {
+        const previousMode = this.controlMode;
+        this.controlMode = mode;
+
+        if (mode === "walk") {
+            if (previousMode === "orbit") {
+                this.orbitPosition.copy(this.instance.position);
+            }
+
+            this.orbitControls.enabled = false;
+            this.pointerControls.enabled = true;
+
+            this.pointerControls.getObject().position.copy(this.walkPosition);
+
+            const direction = this.defaultLookAt
+                .clone()
+                .sub(this.walkPosition)
+                .normalize();
+            this.pointerControls.getObject().lookAt(this.defaultLookAt);
+
+            this.updateToggleButton();
+        } else if (mode === "orbit") {
+            if (previousMode === "walk") {
+                this.walkPosition.copy(this.pointerControls.getObject().position);
+            }
+
+            this.pointerControls.unlock();
+            this.pointerControls.enabled = false;
+            this.orbitControls.enabled = true;
+
+            this.instance.position.copy(this.orbitPosition);
+
+            this.orbitControls.target.copy(this.defaultLookAt);
+            this.orbitControls.update();
+
+            this.updateToggleButton();
+        }
+    }
+
+    toggleControlMode() {
+        if (this.controlMode === "walk") {
+            this.setControlMode("orbit");
+        } else {
+            this.setControlMode("walk");
+        }
     }
 
     setupEventListeners() {
+        this.canvas.addEventListener("click", () => {
+            if (this.controlMode === "walk" && !this.pointerControls.isLocked) {
+                this.pointerControls.lock();
+            }
+        });
+
         document.addEventListener("keydown", (event) => {
             switch (event.code) {
+                case "Tab":
+                    event.preventDefault();
+                    this.toggleControlMode();
+                    break;
                 case "ShiftLeft":
                 case "ShiftRight":
                     this.speed = 30;
@@ -95,13 +169,51 @@ export default class Camera {
         });
     }
 
+    createModeToggle() {
+        const toggleButton = document.createElement("button");
+        toggleButton.id = "cameraToggle";
+        toggleButton.style.position = "absolute";
+        toggleButton.style.top = "10px";
+        toggleButton.style.right = "10px";
+        toggleButton.style.zIndex = "1000";
+        toggleButton.style.padding = "8px 12px";
+        toggleButton.style.backgroundColor = "#444";
+        toggleButton.style.border = "none";
+        toggleButton.style.borderRadius = "4px";
+        toggleButton.style.color = "white";
+        toggleButton.style.fontFamily = "Arial, sans-serif";
+        toggleButton.style.cursor = "pointer";
+        toggleButton.textContent = "Switch to Orbit Mode";
+
+        toggleButton.addEventListener("click", () => {
+            this.toggleControlMode();
+        });
+
+        this.toggleButton = toggleButton;
+        document.body.appendChild(toggleButton);
+
+        this.updateToggleButton();
+    }
+
+    updateToggleButton() {
+        if (!this.toggleButton) return;
+
+        if (this.controlMode === "walk") {
+            this.toggleButton.textContent = "Switch to Orbit Mode";
+            this.toggleButton.style.backgroundColor = "#444";
+        } else {
+            this.toggleButton.textContent = "Switch to Walk Mode";
+            this.toggleButton.style.backgroundColor = "#007BFF";
+        }
+    }
+
     resize() {
         this.instance.aspect = this.sizes.width / this.sizes.height;
         this.instance.updateProjectionMatrix();
     }
 
     update(deltaTime) {
-        if (this.controls.isLocked) {
+        if (this.controlMode === "walk" && this.pointerControls.isLocked) {
             const timeFactor = deltaTime || 0.016;
 
             this.velocity.x = 0;
@@ -118,8 +230,10 @@ export default class Camera {
                 this.velocity.x -= this.direction.x * this.speed * timeFactor;
             }
 
-            this.controls.moveRight(-this.velocity.x);
-            this.controls.moveForward(-this.velocity.z);
+            this.pointerControls.moveRight(-this.velocity.x);
+            this.pointerControls.moveForward(-this.velocity.z);
+        } else if (this.controlMode === "orbit") {
+            this.orbitControls.update();
         }
     }
 }

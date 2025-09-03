@@ -13,12 +13,12 @@ export default class Flooring
 
         const cubeTextureLoader = new THREE.CubeTextureLoader();
         const cubemap = cubeTextureLoader.load([
-        "https://i.ibb.co/cKWVNbsx/px.png",
-        "https://i.ibb.co/R4GbRxRF/nx.png",
-        "https://i.ibb.co/nqf6SzqP/py.png",
-        "https://i.ibb.co/TD6jb79w/ny.png",
-        "https://i.ibb.co/MkbCNrxp/pz.png",
-        "https://i.ibb.co/s9dXT51h/nz.png"
+        "https://i.ibb.co/MDrdPd2L/Daylight-Box-Right.png",   // +X
+        "https://i.ibb.co/dshf1nfW/Daylight-Box-Left.png",    // -X
+        "https://i.ibb.co/jvX5g7P7/Daylight-Box-Top.png",     // +Y
+        "https://i.ibb.co/p6R1tG39/Daylight-Box-Bottom.png",  // -Y
+        "https://i.ibb.co/XxzNxFPJ/Daylight-Box-Front.png",   // +Z
+        "https://i.ibb.co/RTdx99r2/Daylight-Box-Back.png"  
         ]);
         this.scene.background = cubemap;
         this.scene.environment = cubemap;

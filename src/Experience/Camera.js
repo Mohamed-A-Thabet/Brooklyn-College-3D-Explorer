@@ -18,10 +18,11 @@ export default class Camera {
         this.direction = new THREE.Vector3();
         this.speed = 15.0;
 
-        this.controlMode = "walk";
+        this.controlMode = "orbit";
 
         this.walkPosition = new THREE.Vector3(0, 3, -15);
-        this.orbitPosition = new THREE.Vector3(0, 20, 10);
+
+        this.orbitPosition = new THREE.Vector3(0, 60, -90);
 
         this.defaultLookAt = new THREE.Vector3(0, 3, 100);
 
@@ -29,6 +30,7 @@ export default class Camera {
         this.setControls();
         this.setupEventListeners();
         this.createModeToggle();
+        this.createControlsOverlay();
     }
 
     setInstance() {
@@ -39,7 +41,7 @@ export default class Camera {
             1500,
         );
 
-        this.instance.position.copy(this.walkPosition);
+        this.instance.position.copy(this.orbitPosition);
         this.instance.lookAt(this.defaultLookAt);
         this.scene.add(this.instance);
     }
@@ -80,7 +82,10 @@ export default class Camera {
                 .normalize();
             this.pointerControls.getObject().lookAt(this.defaultLookAt);
 
+            this.pointerControls.lock();
+
             this.updateToggleButton();
+            this.showControlsOverlay(true);
         } else if (mode === "orbit") {
             if (previousMode === "walk") {
                 this.walkPosition.copy(this.pointerControls.getObject().position);
@@ -96,6 +101,7 @@ export default class Camera {
             this.orbitControls.update();
 
             this.updateToggleButton();
+            this.showControlsOverlay(false);
         }
     }
 
@@ -183,7 +189,7 @@ export default class Camera {
         toggleButton.style.color = "white";
         toggleButton.style.fontFamily = "Arial, sans-serif";
         toggleButton.style.cursor = "pointer";
-        toggleButton.textContent = "Switch to Orbit Mode";
+        toggleButton.textContent = "Switch to Walk Mode";
 
         toggleButton.addEventListener("click", () => {
             this.toggleControlMode();
@@ -204,6 +210,54 @@ export default class Camera {
         } else {
             this.toggleButton.textContent = "Switch to Walk Mode";
             this.toggleButton.style.backgroundColor = "#007BFF";
+        }
+    }
+
+    createControlsOverlay() {
+        const controlsOverlay = document.createElement("div");
+        controlsOverlay.id = "controlsOverlay";
+        controlsOverlay.style.position = "absolute";
+        controlsOverlay.style.top = "60px";
+        controlsOverlay.style.right = "10px";
+        controlsOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+        controlsOverlay.style.color = "white";
+        controlsOverlay.style.padding = "15px";
+        controlsOverlay.style.borderRadius = "5px";
+        controlsOverlay.style.fontFamily = "Arial, sans-serif";
+        controlsOverlay.style.zIndex = "1000";
+        controlsOverlay.style.display = "none";
+        controlsOverlay.style.textAlign = "left";
+
+        controlsOverlay.innerHTML = `
+            <div style="margin-bottom: 8px; font-weight: bold;">Walk Mode Controls</div>
+            <div>Move: W, A, S, D or Arrow Keys</div>
+            <div>Look Around: Mouse Movement</div>
+            <div>Run: Hold Shift</div>
+            <div>Exit Walk Mode: ESC</div>
+            <div>Change to Orbit Mode: Tab</div>
+        `;
+
+        this.controlsOverlay = controlsOverlay;
+        document.body.appendChild(controlsOverlay);
+
+        document.addEventListener("pointerlockchange", () => {
+            if (this.controlMode === "walk") {
+                if (document.pointerLockElement) {
+                    this.showControlsOverlay(true);
+                } else {
+                    this.showControlsOverlay(false);
+                }
+            }
+        });
+    }
+
+    showControlsOverlay(show) {
+        if (!this.controlsOverlay) return;
+
+        if (show && this.controlMode === "walk") {
+            this.controlsOverlay.style.display = "block";
+        } else {
+            this.controlsOverlay.style.display = "none";
         }
     }
 

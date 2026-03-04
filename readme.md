@@ -1,4 +1,4 @@
-# [Brooklyn College 3D Explorer](https://staging.d36c0p0va6gui2.amplifyapp.com/)
+# [Brooklyn College 3D Explorer](https://brooklyncollege3d.com/)
 
 An interactive 3D environment of the Brooklyn College Campus built with Three.js that lets you explore the East Quad with two different camera modes and features a custom procedural grass system. You can walk around in first-person mode or switch to an orbital camera to get a bird's eye view of the scene. The grass system renders over 100k individual blades that sway in the wind.
 
